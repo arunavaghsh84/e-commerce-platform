@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
+use App\Http\Requests\SaveProductRequest;
 use App\Models\Category;
-use Illuminate\Http\Request;
+use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -25,15 +25,9 @@ class ProductController extends Controller
         return view('admin.products.create', compact('categories'));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(SaveProductRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'category_id' => 'nullable|exists:categories,id',
-            'is_active' => 'boolean',
-        ]);
-
+        $validated = $request->validated();
         $validated['is_active'] = $request->has('is_active');
 
         Product::create($validated);
@@ -56,15 +50,9 @@ class ProductController extends Controller
         return view('admin.products.edit', compact('product', 'categories'));
     }
 
-    public function update(Request $request, Product $product): RedirectResponse
+    public function update(SaveProductRequest $request, Product $product): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'category_id' => 'nullable|exists:categories,id',
-            'is_active' => 'boolean',
-        ]);
-
+        $validated = $request->validated();
         $validated['is_active'] = $request->has('is_active');
 
         $product->update($validated);

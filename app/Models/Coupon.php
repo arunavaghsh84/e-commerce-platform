@@ -20,12 +20,15 @@ class Coupon extends Model
         'is_active',
     ];
 
-    protected $casts = [
-        'discount_value' => 'decimal:2',
-        'valid_from' => 'datetime',
-        'valid_until' => 'datetime',
-        'is_active' => 'boolean',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'discount_value' => 'decimal:2',
+            'valid_from' => 'datetime',
+            'valid_until' => 'datetime',
+            'is_active' => 'boolean',
+        ];
+    }
 
     public function categories(): BelongsToMany
     {
@@ -66,6 +69,7 @@ class Coupon extends Model
     public function scopeValid($query)
     {
         $now = now();
+
         return $query->where('is_active', true)
             ->where('valid_from', '<=', $now)
             ->where('valid_until', '>=', $now);

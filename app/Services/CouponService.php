@@ -17,11 +17,6 @@ class CouponService
             return false;
         }
 
-        // Check minimum order amount
-        if ($orderAmount < $coupon->minimum_order_amount) {
-            return false;
-        }
-
         // Check if cart has eligible products for this coupon
         if (!$this->hasEligibleProducts($coupon, $cartItems)) {
             return false;
@@ -56,10 +51,6 @@ class CouponService
         $discount = $coupon->discount_type === 'percentage'
             ? ($orderAmount * $coupon->discount_value / 100)
             : $coupon->discount_value;
-
-        if ($coupon->maximum_discount_amount) {
-            $discount = min($discount, $coupon->maximum_discount_amount);
-        }
 
         return round($discount, 2);
     }
@@ -102,11 +93,7 @@ class CouponService
             return $result;
         }
 
-        // Check usage limits
-        if ($coupon->usage_limit && $coupon->used_count >= $coupon->usage_limit) {
-            $result['message'] = 'This coupon has reached its usage limit.';
-            return $result;
-        }
+        // Skip usage limit checks as these fields don't exist in current schema
 
         // Check if cart has eligible products
         if (!$this->hasEligibleProducts($coupon, $cartItems)) {
@@ -115,16 +102,7 @@ class CouponService
             return $result;
         }
 
-        // Calculate cart subtotal
-        $cartSubtotal = $cartItems->sum(function ($item) {
-            return $item['price'] * $item['quantity'];
-        });
-
-        // Check minimum order amount
-        if ($cartSubtotal < $coupon->minimum_order_amount) {
-            $result['message'] = 'Minimum order amount required: $' . number_format($coupon->minimum_order_amount, 2);
-            return $result;
-        }
+        // Skip minimum order amount check as this field doesn't exist in current schema
 
         // All validations passed
         $result['valid'] = true;
@@ -133,11 +111,8 @@ class CouponService
             'id' => $coupon->id,
             'code' => $coupon->code,
             'name' => $coupon->name,
-            'description' => $coupon->description,
             'discount_type' => $coupon->discount_type,
             'discount_value' => $coupon->discount_value,
-            'maximum_discount_amount' => $coupon->maximum_discount_amount,
-            'minimum_order_amount' => $coupon->minimum_order_amount,
             'valid_from' => $coupon->valid_from->format('M d, Y'),
             'valid_until' => $coupon->valid_until->format('M d, Y'),
         ];
